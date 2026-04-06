@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Analytics } from "@vercel/analytics/react";
 import MapView from "./MapView";
 import ReportForm from "./ReportForm";
 import Dashboard from "./Dashboard";
@@ -190,6 +191,7 @@ function App() {
         />
       </div>
 
+      <Analytics />
     </div>
   );
 }
