@@ -198,16 +198,45 @@ function MarkersLayer({ reports }) {
   );
 }
 
-// 🎮 BOTONES
+// 🎮 BOTONES MEJORADOS
 function MapControls({ onReportFromLocation }) {
   const map = useMap();
 
-  const goToMyLocation = () => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const { latitude, longitude } = pos.coords;
-      map.setView([latitude, longitude], 16);
+  const getLocation = (callback) => {
+    if (!navigator.geolocation) {
+      alert("❌ Tu navegador no soporta geolocalización");
+      return;
+    }
 
-      L.marker([latitude, longitude])
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        callback(latitude, longitude);
+      },
+      (err) => {
+        console.error(err);
+
+        if (err.code === 1) {
+          alert("❌ Permiso de ubicación bloqueado");
+        } else if (err.code === 2) {
+          alert("❌ Ubicación no disponible");
+        } else {
+          alert("❌ Error obteniendo ubicación");
+        }
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    );
+  };
+
+  const goToMyLocation = () => {
+    getLocation((lat, lng) => {
+      map.setView([lat, lng], 16);
+
+      L.marker([lat, lng])
         .addTo(map)
         .bindPopup("Estás aquí 📍")
         .openPopup();
@@ -215,15 +244,9 @@ function MapControls({ onReportFromLocation }) {
   };
 
   const reportHere = () => {
-    navigator.geolocation.getCurrentPosition((pos) => {
-      const { latitude, longitude } = pos.coords;
-
-      onReportFromLocation({
-        lat: latitude,
-        lng: longitude
-      });
-
-      map.setView([latitude, longitude], 16);
+    getLocation((lat, lng) => {
+      onReportFromLocation({ lat, lng });
+      map.setView([lat, lng], 16);
     });
   };
 
@@ -239,9 +262,12 @@ function MapControls({ onReportFromLocation }) {
           background: "#2563eb",
           color: "#fff",
           border: "none",
-          padding: "12px",
+          width: "60px",
+          height: "60px",
           borderRadius: "50%",
-          cursor: "pointer"
+          fontSize: "24px",
+          cursor: "pointer",
+          boxShadow: "0 6px 18px rgba(0,0,0,0.5)"
         }}
       >
         📍
@@ -251,15 +277,18 @@ function MapControls({ onReportFromLocation }) {
         onClick={reportHere}
         style={{
           position: "absolute",
-          bottom: 80,
+          bottom: 100,
           right: 20,
           zIndex: 1000,
           background: "#dc2626",
           color: "#fff",
           border: "none",
-          padding: "12px",
+          width: "60px",
+          height: "60px",
           borderRadius: "50%",
-          cursor: "pointer"
+          fontSize: "24px",
+          cursor: "pointer",
+          boxShadow: "0 6px 18px rgba(0,0,0,0.5)"
         }}
       >
         🚨
@@ -321,7 +350,6 @@ export default function MapView({
       )}
 
       <MapControls onReportFromLocation={onReportFromLocation} />
-
     </MapContainer>
   );
 }
