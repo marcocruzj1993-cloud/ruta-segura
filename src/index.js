@@ -4,9 +4,15 @@ import App from "./App";
 import "./index.css";
 import "leaflet/dist/leaflet.css"; // 🔥 IMPORTANTE
 
+// 🔥 NUEVO: importar service worker
+import * as serviceWorkerRegistration from "./serviceWorkerRegistration";
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <App />
   </React.StrictMode>
 );
+
+// 🔥 NUEVO: activar PWA
+serviceWorkerRegistration.register();

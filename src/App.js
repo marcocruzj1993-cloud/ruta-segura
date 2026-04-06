@@ -40,7 +40,6 @@ function App() {
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "reports"), (snapshot) => {
 
-      // 🔥 AGREGAMOS ID REAL (NO QUITAMOS NADA)
       const data = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
@@ -57,7 +56,6 @@ function App() {
         ...simulated
       ];
 
-      // 🔥 NUEVO: eliminar duplicados
       const unique = Array.from(
         new Map(
           merged.map(r => [
@@ -125,7 +123,25 @@ function App() {
     <div className="container">
 
       <div className="sidebar">
-        <h1>🚨 RutaSegura</h1>
+
+        {/* 🔥 HEADER PRO */}
+        <div style={{ marginBottom: "10px" }}>
+          <h1 style={{ margin: 0 }}>RutaSegura</h1>
+          <small style={{ color: "#94a3b8" }}>
+            Protege tu camino en tiempo real
+          </small>
+        </div>
+
+        {/* 🔥 INSTRUCCIÓN */}
+        <div style={{
+          background: "#1e293b",
+          padding: "8px",
+          borderRadius: "8px",
+          marginBottom: "10px",
+          fontSize: "12px"
+        }}>
+          📍 Haz clic en el mapa para seleccionar ubicación
+        </div>
 
         {/* 🔔 ALERTAS */}
         {alerts.map(a => (
@@ -154,7 +170,6 @@ function App() {
         {/* 📍 FORMULARIO */}
         <ReportForm
           onAdd={(report) => {
-            // 🔥 AGREGAMOS FLAG PARA MAPVIEW
             const enrichedReport = {
               ...report,
               isNew: true
@@ -168,6 +183,9 @@ function App() {
             });
 
             setSelectedLocation(null);
+
+            // 🔥 FEEDBACK UX
+            alert("✅ Reporte enviado correctamente");
           }}
           selectedLocation={selectedLocation}
         />
