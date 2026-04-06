@@ -1,0 +1,95 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  background: #f1f5f9;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 320px;
+  background: #0f172a;
+  color: #f9fafb;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+h1 {
+  font-size: 20px;
+}
+
+h3 {
+  font-size: 14px;
+  color: #9ca3af;
+  margin-top: 20px;
+}
+
+select, textarea, input {
+  width: 100%;
+  background: #1f2933;
+  border: 1px solid #374151;
+  color: #f9fafb;
+  padding: 8px;
+  border-radius: 8px;
+  margin-top: 5px;
+}
+
+button {
+  background: #1e293b;
+  color: #e5e7eb;
+  border: none;
+  padding: 8px;
+  margin: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #334155;
+}
+
+button[type="submit"] {
+  background: #22c55e;
+  color: #022c22;
+  font-weight: bold;
+}
+
+.map {
+  flex: 1;
+  height: 100%;
+}
+
+.leaflet-container {
+  height: 100%;
+  width: 100%;
+}
+
+.leaflet-container img {
+  max-width: none !important;
+}/* 🔥 FIX CRÍTICO: evitar que el mapa tape el sidebar */
+.container {
+  position: relative; /* 🔥 nuevo */
+}
+
+/* 🔥 sidebar siempre encima */
+.sidebar {
+  position: relative; /* 🔥 nuevo */
+  z-index: 1000;       /* 🔥 nuevo */
+}
+
+/* 🔥 mapa controlado */
+.map {
+  position: relative; /* 🔥 nuevo */
+  z-index: 1;          /* 🔥 nuevo */
+}
+
+/* 🔥 evita desbordes raros de leaflet */
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom {
+  z-index: 400 !important;
+}
