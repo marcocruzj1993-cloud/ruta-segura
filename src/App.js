@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import MapView from "./MapView";
 import ReportForm from "./ReportForm";
-import Dashboard from "./Dashboard";
 import StatsPanel from "./StatsPanel";
 
 import realReports from "./realData";
@@ -36,7 +35,7 @@ function App() {
     return () => navigator.geolocation.clearWatch(watchId);
   }, []);
 
-  // 🔥 DATA (MEJORADA)
+  // 🔥 DATA
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, "reports"), (snapshot) => {
 
@@ -76,7 +75,12 @@ function App() {
     setSelectedLocation(latlng);
   };
 
-  // 📊 FILTRO POR ZONA VISIBLE
+  // 🚨 NUEVO: REPORTAR DESDE BOTÓN DEL MAPA
+  const handleReportFromLocation = (coords) => {
+    setSelectedLocation(coords);
+  };
+
+  // 📊 FILTRO POR ZONA
   const visibleReports = reports.filter(r => {
     if (!bounds) return true;
     return bounds.contains(L.latLng(r.lat, r.lng));
@@ -96,7 +100,7 @@ function App() {
 
   const nearbyReports = getNearbyReports();
 
-  // 🔔 ALERTAS AUTOMÁTICAS
+  // 🔔 ALERTAS
   useEffect(() => {
     if (nearbyReports.length > 50) {
       setAlerts(prev => [
@@ -124,7 +128,7 @@ function App() {
 
       <div className="sidebar">
 
-        {/* 🔥 HEADER PRO */}
+        {/* HEADER */}
         <div style={{ marginBottom: "10px" }}>
           <h1 style={{ margin: 0 }}>RutaSegura</h1>
           <small style={{ color: "#94a3b8" }}>
@@ -132,7 +136,7 @@ function App() {
           </small>
         </div>
 
-        {/* 🔥 INSTRUCCIÓN */}
+        {/* INSTRUCCIÓN */}
         <div style={{
           background: "#1e293b",
           padding: "8px",
@@ -140,10 +144,10 @@ function App() {
           marginBottom: "10px",
           fontSize: "12px"
         }}>
-          📍 Haz clic en el mapa para seleccionar ubicación
+          📍 Haz clic en el mapa o usa 🚨 para reportar
         </div>
 
-        {/* 🔔 ALERTAS */}
+        {/* ALERTAS */}
         {alerts.map(a => (
           <div key={a.id} style={{
             background: "#7f1d1d",
@@ -155,7 +159,7 @@ function App() {
           </div>
         ))}
 
-        {/* 📊 PREDICCIÓN */}
+        {/* PREDICCIÓN */}
         <div style={{
           background: "#1e293b",
           padding: "10px",
@@ -167,7 +171,7 @@ function App() {
           <small>{nearbyReports.length} incidentes cercanos</small>
         </div>
 
-        {/* 📍 FORMULARIO */}
+        {/* FORMULARIO */}
         <ReportForm
           onAdd={(report) => {
             const enrichedReport = {
@@ -184,17 +188,14 @@ function App() {
 
             setSelectedLocation(null);
 
-            // 🔥 FEEDBACK UX
             alert("✅ Reporte enviado correctamente");
           }}
           selectedLocation={selectedLocation}
         />
 
-        {/* 📊 STATS */}
+        {/* STATS */}
         <StatsPanel reports={visibleReports} />
 
-        {/* 📊 DASHBOARD */}
-        <Dashboard reports={reports} />
       </div>
 
       <div className="map">
@@ -205,6 +206,7 @@ function App() {
           userLocation={userLocation}
           selectedLocation={selectedLocation}
           reportMarker={reportMarker}
+          onReportFromLocation={handleReportFromLocation} // 🔥 CLAVE
         />
       </div>
 

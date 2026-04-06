@@ -27,21 +27,19 @@ const customIcon = new L.Icon({
   iconAnchor: [14, 28],
 });
 
-// 🟡 cursor (selección)
 const selectedIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/854/854878.png",
   iconSize: [30, 30],
   iconAnchor: [15, 30],
 });
 
-// 🟢 reporte enviado
 const reportIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/190/190411.png",
   iconSize: [32, 32],
   iconAnchor: [16, 32],
 });
 
-// 🧠 PANES (ORDEN CORRECTO)
+// 🧠 PANES
 function SetupPanes() {
   const map = useMap();
 
@@ -58,7 +56,7 @@ function SetupPanes() {
   return null;
 }
 
-// 📊 BOUNDS (para stats)
+// 📊 BOUNDS
 function MapBounds({ onBoundsChange }) {
   const map = useMap();
 
@@ -92,7 +90,7 @@ function MapClickHandler({ onMapClick }) {
   return null;
 }
 
-// 🔥 HEATMAP PRO
+// 🔥 HEATMAP
 function Heatmap({ reports }) {
   const map = useMap();
 
@@ -105,11 +103,7 @@ function Heatmap({ reports }) {
       const pane = map.getPane("heatPane");
       if (!pane) return;
 
-      const size = map.getSize();
-      if (!size.x || !size.y) return;
-
       const zoom = map.getZoom();
-
       if (zoom > 15) return;
 
       const points = reports.map(r => [
@@ -148,7 +142,7 @@ function Heatmap({ reports }) {
   return null;
 }
 
-// 📍 MARKERS INTELIGENTES
+// 📍 MARKERS
 function MarkersLayer({ reports }) {
   const map = useMap();
   const [zoom, setZoom] = useState(map.getZoom());
@@ -162,7 +156,6 @@ function MarkersLayer({ reports }) {
   const recent = reports.slice(-20);
 
   let base = [];
-
   if (zoom < 10) base = reports.slice(0, 30);
   else if (zoom < 13) base = reports.slice(0, 100);
   else base = reports.slice(0, 300);
@@ -185,20 +178,16 @@ function MarkersLayer({ reports }) {
               paddingLeft: "6px"
             }}>
               <strong>{r.type || "Incidente"}</strong>
-
               <br />
               🕒 {r.timeOfDay || "Sin horario"}
-
               <br />
               {r.confidence === "Verificado" && "🟢 Verificado"}
               {r.confidence === "Reporte ciudadano" && "🟠 Ciudadano"}
               {r.confidence === "Estimado" && "🟡 Estimado"}
-
               <br />
               📅 {r.incidentDate
                 ? new Date(r.incidentDate).toLocaleDateString()
                 : "Sin fecha"}
-
               <br />
               📝 {r.description?.trim() || "Sin descripción"}
             </div>
@@ -209,14 +198,85 @@ function MarkersLayer({ reports }) {
   );
 }
 
+// 🎮 BOTONES
+function MapControls({ onReportFromLocation }) {
+  const map = useMap();
+
+  const goToMyLocation = () => {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const { latitude, longitude } = pos.coords;
+      map.setView([latitude, longitude], 16);
+
+      L.marker([latitude, longitude])
+        .addTo(map)
+        .bindPopup("Estás aquí 📍")
+        .openPopup();
+    });
+  };
+
+  const reportHere = () => {
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const { latitude, longitude } = pos.coords;
+
+      onReportFromLocation({
+        lat: latitude,
+        lng: longitude
+      });
+
+      map.setView([latitude, longitude], 16);
+    });
+  };
+
+  return (
+    <>
+      <button
+        onClick={goToMyLocation}
+        style={{
+          position: "absolute",
+          bottom: 20,
+          right: 20,
+          zIndex: 1000,
+          background: "#2563eb",
+          color: "#fff",
+          border: "none",
+          padding: "12px",
+          borderRadius: "50%",
+          cursor: "pointer"
+        }}
+      >
+        📍
+      </button>
+
+      <button
+        onClick={reportHere}
+        style={{
+          position: "absolute",
+          bottom: 80,
+          right: 20,
+          zIndex: 1000,
+          background: "#dc2626",
+          color: "#fff",
+          border: "none",
+          padding: "12px",
+          borderRadius: "50%",
+          cursor: "pointer"
+        }}
+      >
+        🚨
+      </button>
+    </>
+  );
+}
+
 // 🚀 MAPA PRINCIPAL
 export default function MapView({
   reports = [],
   onMapClick,
   onBoundsChange,
   userLocation,
-  selectedLocation,   // 🔥 NUEVO
-  reportMarker        // 🔥 NUEVO
+  selectedLocation,
+  reportMarker,
+  onReportFromLocation
 }) {
   return (
     <MapContainer
@@ -234,27 +294,18 @@ export default function MapView({
       <Heatmap reports={reports} />
       <MarkersLayer reports={reports} />
 
-      {/* 🎯 CURSOR */}
       {selectedLocation && (
-        <Marker
-          position={[selectedLocation.lat, selectedLocation.lng]}
-          icon={selectedIcon}
-        >
+        <Marker position={[selectedLocation.lat, selectedLocation.lng]} icon={selectedIcon}>
           <Popup>📍 Ubicación seleccionada</Popup>
         </Marker>
       )}
 
-      {/* 📌 REPORTE */}
       {reportMarker && (
-        <Marker
-          position={[reportMarker.lat, reportMarker.lng]}
-          icon={reportIcon}
-        >
+        <Marker position={[reportMarker.lat, reportMarker.lng]} icon={reportIcon}>
           <Popup>✅ Reporte enviado aquí</Popup>
         </Marker>
       )}
 
-      {/* 📍 USUARIO */}
       {userLocation && (
         <>
           <Marker position={[userLocation.lat, userLocation.lng]}>
@@ -264,13 +315,13 @@ export default function MapView({
           <Circle
             center={[userLocation.lat, userLocation.lng]}
             radius={1500}
-            pathOptions={{
-              color: "red",
-              fillOpacity: 0.1
-            }}
+            pathOptions={{ color: "red", fillOpacity: 0.1 }}
           />
         </>
       )}
+
+      <MapControls onReportFromLocation={onReportFromLocation} />
+
     </MapContainer>
   );
 }
